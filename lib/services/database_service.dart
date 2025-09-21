@@ -37,9 +37,23 @@ class DatabaseService {
     if (_connection == null) throw Exception('Database not connected');
 
     try {
+      // Створюємо таблицю користувачів
+      await _connection!.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+          id VARCHAR(64) PRIMARY KEY,
+          username VARCHAR(50) UNIQUE NOT NULL,
+          email VARCHAR(100) UNIQUE NOT NULL,
+          password_hash VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      ''');
+
+      // Створюємо таблицю todos з посиланням на користувача
       await _connection!.execute('''
         CREATE TABLE IF NOT EXISTS todos (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          id SERIAL PRIMARY KEY,
+          user_id VARCHAR(64) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           title VARCHAR(255) NOT NULL,
           description TEXT,
           is_completed BOOLEAN DEFAULT FALSE,

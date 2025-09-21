@@ -4,11 +4,11 @@ import 'database_service.dart';
 class TodoService {
   final DatabaseService _db = DatabaseService.instance;
 
-  Future<Todo> createTodo(
-      String title, String? description, bool? isCompleted) async {
+  Future<Todo> createTodo(String userId, String title, String? description,
+      bool? isCompleted) async {
     final result = await _db.connection.execute(
-      'INSERT INTO todos (title, description, is_completed) VALUES (\$1, \$2, \$3) RETURNING *',
-      parameters: [title, description, isCompleted],
+      'INSERT INTO todos (user_id, title, description, is_completed) VALUES (\$1, \$2, \$3, \$4) RETURNING *',
+      parameters: [userId, title, description, isCompleted ?? false],
     );
 
     return Todo.fromJson(result.first.toColumnMap());
@@ -27,6 +27,15 @@ class TodoService {
   Future<List<Todo>> getAllTodos() async {
     final result = await _db.connection
         .execute('SELECT * FROM todos ORDER BY created_at DESC');
+
+    return result.map((row) => Todo.fromJson(row.toColumnMap())).toList();
+  }
+
+  Future<List<Todo>> getTodosByUserId(String userId) async {
+    final result = await _db.connection.execute(
+      'SELECT * FROM todos WHERE user_id = \$1 ORDER BY created_at DESC',
+      parameters: [userId],
+    );
 
     return result.map((row) => Todo.fromJson(row.toColumnMap())).toList();
   }

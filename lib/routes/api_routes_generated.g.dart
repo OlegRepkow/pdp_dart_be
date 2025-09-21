@@ -14,9 +14,34 @@ Router _$ApiRoutesRouter(ApiRoutes service) {
     service.health,
   );
   router.add(
+    'POST',
+    r'/auth/register',
+    service.register,
+  );
+  router.add(
+    'POST',
+    r'/auth/login',
+    service.login,
+  );
+  router.add(
+    'GET',
+    r'/auth/profile',
+    service.getProfile,
+  );
+  router.add(
+    'PUT',
+    r'/auth/profile',
+    service.updateProfile,
+  );
+  router.add(
     'GET',
     r'/todos/all',
     service.getAllTodos,
+  );
+  router.add(
+    'GET',
+    r'/todos',
+    service.getTodosByUserId,
   );
   router.add(
     'POST',

@@ -7,6 +7,15 @@ class TodoController {
 
   Future<Response> createTodo(Request request) async {
     try {
+      final userId = request.context['userId'] as String?;
+      if (userId == null) {
+        return Response(
+          401,
+          body: jsonEncode({'error': 'Unauthorized'}),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
 
@@ -21,8 +30,8 @@ class TodoController {
         );
       }
 
-      final todo =
-          await _todoService.createTodo(title, description, isCompleted);
+      final todo = await _todoService.createTodo(
+          userId, title, description, isCompleted);
       return Response.ok(
         jsonEncode(todo.toJson()),
         headers: {'Content-Type': 'application/json'},
@@ -38,6 +47,29 @@ class TodoController {
   Future<Response> getAllTodos(Request request) async {
     try {
       final todos = await _todoService.getAllTodos();
+      return Response.ok(
+        jsonEncode(todos.map((t) => t.toJson()).toList()),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  }
+
+  Future<Response> getTodosByUserId(Request request) async {
+    final userId = request.context['userId'] as String?;
+    if (userId == null) {
+      return Response(
+        401,
+        body: jsonEncode({'error': 'Unauthorized'}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+    try {
+      final todos = await _todoService.getTodosByUserId(userId);
       return Response.ok(
         jsonEncode(todos.map((t) => t.toJson()).toList()),
         headers: {'Content-Type': 'application/json'},
