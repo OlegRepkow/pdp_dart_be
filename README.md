@@ -201,11 +201,23 @@ https://your-app.onrender.com/api/health
 3. Зачекайте 5-10 хвилин (перший деплой довший)
 4. Після завершення ви отримаєте URL: `https://your-app.onrender.com`
 
-### Крок 4: Перевірка
+### Крок 4: Отримання URL
+
+Після деплою знайдіть URL вашого сервісу:
+
+1. Перейдіть на [Render Dashboard](https://dashboard.render.com)
+2. Відкрийте ваш Web Service
+3. URL відображається вгорі сторінки або в Settings → Service Details
+
+URL матиме формат: `https://your-service-name.onrender.com`
+
+**Детальна інструкція:** Дивіться **[HOW_TO_FIND_RENDER_URL.md](./HOW_TO_FIND_RENDER_URL.md)**
+
+### Крок 5: Перевірка
 
 ```bash
-# Health check
-curl https://your-app.onrender.com/api/health
+# Health check (замініть YOUR-SERVICE-NAME на вашу назву)
+curl https://YOUR-SERVICE-NAME.onrender.com/api/health
 ```
 
 ### ⚠️ Важливо про безкоштовний план Render:

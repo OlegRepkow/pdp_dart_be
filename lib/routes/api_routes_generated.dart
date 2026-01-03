@@ -2,6 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import '../controllers/todo_controller.dart';
 import '../controllers/user_controller.dart';
+import '../controllers/theme_controller.dart';
 import '../middleware/auth_middleware.dart';
 
 part 'api_routes_generated.g.dart';
@@ -9,6 +10,7 @@ part 'api_routes_generated.g.dart';
 class ApiRoutes {
   final TodoController _todoController = TodoController();
   final UserController _userController = UserController();
+  final ThemeController _themeController = ThemeController();
 
   @Route.get('/health')
   Response health(Request request) {
@@ -66,6 +68,15 @@ class ApiRoutes {
   @Route.delete('/todos/all')
   Future<Response> deleteAllTodos(Request request) =>
       _todoController.deleteAllTodos(request);
+
+  // Theme routes
+  @Route.get('/theme')
+  Future<Response> getTheme(Request request) async =>
+      Pipeline().addHandler(_themeController.getTheme)(request);
+
+  @Route.post('/theme')
+  Future<Response> setTheme(Request request) async =>
+      Pipeline().addHandler(_themeController.setTheme)(request);
 
   Router get router => _$ApiRoutesRouter(this);
 }

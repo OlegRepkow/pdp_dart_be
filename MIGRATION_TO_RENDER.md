@@ -253,3 +253,7 @@ const API_URL = 'https://your-app.onrender.com';
 
 **Готово! 🎉 Ваш backend тепер працює на Render безкоштовно!**
 
+
+
+
+

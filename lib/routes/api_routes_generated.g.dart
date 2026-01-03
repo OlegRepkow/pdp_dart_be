@@ -68,5 +68,15 @@ Router _$ApiRoutesRouter(ApiRoutes service) {
     r'/todos/all',
     service.deleteAllTodos,
   );
+  router.add(
+    'GET',
+    r'/theme',
+    service.getTheme,
+  );
+  router.add(
+    'POST',
+    r'/theme',
+    service.setTheme,
+  );
   return router;
 }

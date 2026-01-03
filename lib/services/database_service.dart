@@ -1,7 +1,14 @@
 import 'package:postgres/postgres.dart';
 import '../config/app_config.dart';
 
-class DatabaseService {
+abstract class IDatabaseService {
+  Future<void> connect();
+  Future<void> createTables();
+  Connection get connection;
+  Future<void> close();
+}
+
+class DatabaseService implements IDatabaseService {
   static DatabaseService? _instance;
   Connection? _connection;
   final AppConfig _config = AppConfig.instance;
@@ -13,6 +20,7 @@ class DatabaseService {
     return _instance!;
   }
 
+  @override
   Future<void> connect() async {
     try {
       _connection = await Connection.open(
@@ -33,10 +41,32 @@ class DatabaseService {
     }
   }
 
+  Future<void> _createThemesTable() async {
+    if (_connection == null) throw Exception('Database not connected');
+
+    try {
+      // Створюємо таблицю themes якщо вона не існує
+      await _connection!.execute('''
+        CREATE TABLE IF NOT EXISTS themes (
+          mode VARCHAR(10) PRIMARY KEY,
+          data JSONB NOT NULL
+        );
+      ''');
+      print('Themes table ready');
+    } catch (e) {
+      print('Failed to create themes table: $e');
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> createTables() async {
     if (_connection == null) throw Exception('Database not connected');
 
     try {
+      // Створюємо таблицю themes
+      await _createThemesTable();
+
       // Створюємо таблицю користувачів
       await _connection!.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -69,11 +99,13 @@ class DatabaseService {
     }
   }
 
+  @override
   Connection get connection {
     if (_connection == null) throw Exception('Database not connected');
     return _connection!;
   }
 
+  @override
   Future<void> close() async {
     await _connection?.close();
   }

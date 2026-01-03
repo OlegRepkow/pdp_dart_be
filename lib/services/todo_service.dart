@@ -1,9 +1,22 @@
 import '../models/todo.dart';
 import 'database_service.dart';
 
-class TodoService {
+abstract class ITodoService {
+  Future<Todo> createTodo(
+      String userId, String title, String? description, bool? isCompleted);
+  Future<Todo?> getTodoById(String id);
+  Future<List<Todo>> getAllTodos();
+  Future<List<Todo>> getTodosByUserId(String userId);
+  Future<Todo?> updateTodo(
+      String id, String? title, String? description, bool? isCompleted);
+  Future<bool> deleteTodo(String id);
+  Future<bool> deleteAllTodos();
+}
+
+class TodoService implements ITodoService {
   final DatabaseService _db = DatabaseService.instance;
 
+  @override
   Future<Todo> createTodo(String userId, String title, String? description,
       bool? isCompleted) async {
     final result = await _db.connection.execute(
@@ -14,6 +27,7 @@ class TodoService {
     return Todo.fromJson(result.first.toColumnMap());
   }
 
+  @override
   Future<Todo?> getTodoById(String id) async {
     final result = await _db.connection.execute(
       'SELECT * FROM todos WHERE id = \$1',
@@ -24,6 +38,7 @@ class TodoService {
     return Todo.fromJson(result.first.toColumnMap());
   }
 
+  @override
   Future<List<Todo>> getAllTodos() async {
     final result = await _db.connection
         .execute('SELECT * FROM todos ORDER BY created_at DESC');
@@ -31,6 +46,7 @@ class TodoService {
     return result.map((row) => Todo.fromJson(row.toColumnMap())).toList();
   }
 
+  @override
   Future<List<Todo>> getTodosByUserId(String userId) async {
     final result = await _db.connection.execute(
       'SELECT * FROM todos WHERE user_id = \$1 ORDER BY created_at DESC',
@@ -40,6 +56,7 @@ class TodoService {
     return result.map((row) => Todo.fromJson(row.toColumnMap())).toList();
   }
 
+  @override
   Future<Todo?> updateTodo(
       String id, String? title, String? description, bool? isCompleted) async {
     final updates = <String>[];
@@ -75,6 +92,7 @@ class TodoService {
     return Todo.fromJson(result.first.toColumnMap());
   }
 
+  @override
   Future<bool> deleteTodo(String id) async {
     final result = await _db.connection.execute(
       'DELETE FROM todos WHERE id = \$1',
@@ -84,6 +102,7 @@ class TodoService {
     return result.affectedRows > 0;
   }
 
+  @override
   Future<bool> deleteAllTodos() async {
     final result = await _db.connection.execute(
       'DELETE FROM todos',

@@ -2,9 +2,22 @@ import '../models/user.dart';
 import 'database_service.dart';
 import '../middleware/auth_middleware.dart';
 
-class UserService {
+abstract class IUserService {
+  Future<User> createUser(String username, String email, String password);
+  Future<User?> getUserByUsername(String username);
+  Future<User?> getUserById(String id);
+  Future<User?> getUserByEmail(String email);
+  bool verifyPassword(String password, String storedPassword);
+  Future<List<User>> getAllUsers();
+  Future<bool> updateUser(String id,
+      {String? username, String? email, String? password});
+  Future<bool> deleteUser(String id);
+}
+
+class UserService implements IUserService {
   final DatabaseService _db = DatabaseService.instance;
 
+  @override
   Future<User> createUser(
       String username, String email, String password) async {
     final userId = AuthMiddleware.generateUserId(password);
@@ -15,6 +28,7 @@ class UserService {
     return User.fromJson(result.first.toColumnMap());
   }
 
+  @override
   Future<User?> getUserByUsername(String username) async {
     final result = await _db.connection.execute(
       'SELECT * FROM users WHERE username = \$1',
@@ -24,6 +38,7 @@ class UserService {
     return User.fromJson(result.first.toColumnMap());
   }
 
+  @override
   Future<User?> getUserById(String id) async {
     final result = await _db.connection.execute(
       'SELECT * FROM users WHERE id = \$1',
@@ -33,6 +48,7 @@ class UserService {
     return User.fromJson(result.first.toColumnMap());
   }
 
+  @override
   Future<User?> getUserByEmail(String email) async {
     final result = await _db.connection.execute(
       'SELECT * FROM users WHERE email = \$1',
@@ -42,10 +58,12 @@ class UserService {
     return User.fromJson(result.first.toColumnMap());
   }
 
+  @override
   bool verifyPassword(String password, String storedPassword) {
     return password == storedPassword;
   }
 
+  @override
   Future<List<User>> getAllUsers() async {
     final result = await _db.connection.execute(
       'SELECT * FROM users ORDER BY created_at DESC',
@@ -53,6 +71,7 @@ class UserService {
     return result.map((row) => User.fromJson(row.toColumnMap())).toList();
   }
 
+  @override
   Future<bool> updateUser(String id,
       {String? username, String? email, String? password}) async {
     if (password != null) {
@@ -118,6 +137,7 @@ class UserService {
     }
   }
 
+  @override
   Future<bool> deleteUser(String id) async {
     final result = await _db.connection.execute(
       'DELETE FROM users WHERE id = \$1',
