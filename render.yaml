@@ -1,0 +1,51 @@
+services:
+  # Backend service
+  - type: web
+    name: todo-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: /app/bin/server
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      # PORT is automatically provided by Render
+      - key: PORT
+        value: "8080"
+      - key: ENVIRONMENT
+        value: production
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: LOG_LEVEL
+        value: info
+      - key: ENABLE_REQUEST_LOGGING
+        value: "true"
+      # Database connection - will be set from PostgreSQL service
+      - key: DB_HOST
+        fromDatabase:
+          name: todo-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: todo-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: todo-postgres
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: todo-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: todo-postgres
+          property: password
+
+databases:
+  # PostgreSQL database
+  - name: todo-postgres
+    plan: free
+    databaseName: todo_db
+    user: todo_user
