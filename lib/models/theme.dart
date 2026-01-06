@@ -1,27 +1,29 @@
 class Theme {
-  final String mode;
-  final Map<String, dynamic> data;
+  final Map<String, dynamic> dark;
+  final Map<String, dynamic> light;
 
   Theme({
-    required this.mode,
-    required this.data,
+    required this.dark,
+    required this.light,
   });
 
   // Конструктор для створення з JSON
   factory Theme.fromJson(Map<String, dynamic> json) {
     return Theme(
-      mode: json['mode'] as String,
-      data: json['data'] is Map<String, dynamic>
-          ? json['data'] as Map<String, dynamic>
-          : Map<String, dynamic>.from(json['data'] as Map),
+      dark: json['dark'] is Map<String, dynamic>
+          ? json['dark'] as Map<String, dynamic>
+          : Map<String, dynamic>.from(json['dark'] as Map),
+      light: json['light'] is Map<String, dynamic>
+          ? json['light'] as Map<String, dynamic>
+          : Map<String, dynamic>.from(json['light'] as Map),
     );
   }
 
   // Метод для конвертації в JSON
   Map<String, dynamic> toJson() {
     return {
-      'mode': mode,
-      'data': data,
+      'dark': dark,
+      'light': light,
     };
   }
 }

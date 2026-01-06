@@ -45,14 +45,17 @@ class DatabaseService implements IDatabaseService {
     if (_connection == null) throw Exception('Database not connected');
 
     try {
-      // Створюємо таблицю themes якщо вона не існує
+      // Видаляємо стару таблицю, якщо вона існує (для development)
+      // У production можна додати перевірку середовища
+      await _connection!.execute('DROP TABLE IF EXISTS themes CASCADE');
+      
+      // Створюємо таблицю themes з правильною структурою
       await _connection!.execute('''
-        CREATE TABLE IF NOT EXISTS themes (
-          mode VARCHAR(10) PRIMARY KEY,
-          data JSONB NOT NULL
+        CREATE TABLE themes (
+          theme_data JSONB NOT NULL
         );
       ''');
-      print('Themes table ready');
+      print('Themes table created successfully');
     } catch (e) {
       print('Failed to create themes table: $e');
       rethrow;

@@ -8,26 +8,17 @@ class ThemeController {
   Future<Response> setTheme(Request request) async {
     try {
       final body = await request.readAsString();
-      final data = jsonDecode(body) as Map<String, dynamic>;
+      final jsonData = jsonDecode(body) as Map<String, dynamic>;
 
-      final mode = data['mode'] as String?;
-      final themeData = data['data'] as Map<String, dynamic>?;
-
-      if (mode == null || themeData == null) {
-        return Response.badRequest(
-          body: jsonEncode({'error': 'mode and data are required'}),
-          headers: {'Content-Type': 'application/json'},
-        );
+      // Витягуємо themeData з JSON, якщо він є, інакше використовуємо весь об'єкт
+      Map<String, dynamic> themeData;
+      if (jsonData.containsKey('themeData')) {
+        themeData = jsonData['themeData'] as Map<String, dynamic>;
+      } else {
+        themeData = jsonData;
       }
 
-      if (mode != 'light' && mode != 'dark') {
-        return Response.badRequest(
-          body: jsonEncode({'error': 'mode must be "light" or "dark"'}),
-          headers: {'Content-Type': 'application/json'},
-        );
-      }
-
-      final theme = await _themeService.setTheme(mode, themeData);
+      final theme = await _themeService.setTheme(themeData);
       if (theme == null) {
         return Response.internalServerError(
           body: jsonEncode({'error': 'Failed to save theme'}),
@@ -38,7 +29,9 @@ class ThemeController {
         jsonEncode(theme.toJson()),
         headers: {'Content-Type': 'application/json'},
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Error in setTheme: $e');
+      print('Stack trace: $stackTrace');
       return Response.internalServerError(
         body: jsonEncode({'error': e.toString()}),
         headers: {'Content-Type': 'application/json'},
@@ -48,22 +41,8 @@ class ThemeController {
 
   Future<Response> getTheme(Request request) async {
     try {
-      final mode = request.url.queryParameters['mode'];
-      if (mode == null) {
-        return Response.badRequest(
-          body: jsonEncode({'error': 'mode query parameter is required'}),
-          headers: {'Content-Type': 'application/json'},
-        );
-      }
+      final theme = await _themeService.getTheme();
 
-      if (mode != 'light' && mode != 'dark') {
-        return Response.badRequest(
-          body: jsonEncode({'error': 'mode must be "light" or "dark"'}),
-          headers: {'Content-Type': 'application/json'},
-        );
-      }
-
-      final theme = await _themeService.getTheme(mode);
       if (theme == null) {
         return Response.notFound(
           jsonEncode({'error': 'Theme not found'}),
